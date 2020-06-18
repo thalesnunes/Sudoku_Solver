@@ -51,9 +51,10 @@ class Sudoku:
         for i, row in enumerate(self.board):
             for j, numb in enumerate(row):
                 if numb == 0:
-                    yield (i, j) 
+                    return (i, j)
                 else:
                     continue
+        return None
                 
     def value_checker(self, coord):
         row, col = coord
@@ -61,16 +62,13 @@ class Sudoku:
         for i in range(9):
             if i != col:
                 if to_check == self.board[row][i]:
-                    print('row')
                     return False
             if i != row:
-                if to_check == self.board[i][col]:
-                    print('column')
+                if to_check == self.board[i][col]:                 
                     return False
 
         sec = self.sector_identifier(coord)
         if to_check in self.sectors[f'Sector{sec}']:
-            print('sector')
             return False
 
         self.sectors[f'Sector{sec}'].append(to_check)        
@@ -88,7 +86,7 @@ class Sudoku:
             self.sectors[f'Sector{sec}'].pop()
         for new in range(value+1, 10):
             self.change_value(coord, new)
-            self.display()
+            # self.display()
             outcome = self.value_checker(coord)
             if outcome:
                 break
@@ -106,18 +104,17 @@ class Sudoku:
 
         os.system('cls')
         print(self, end='\r', flush=True)
-        sleep(0.1)
     
     def __str__(self):
         string = ''
         for n, row in enumerate(self.board):
             for ind, numb in enumerate(row):
-                if ind == 3 or ind == 6:
+                if ind == 3 or ind == 6 or ind == 0:
                     string += '| '
-                string += f'{str(numb)} ' if not ind == 8 else str(numb)
-            string += '\n'
+                string += f'{str(numb)} '
+            string += '|\n'
             if n == 2 or n == 5:
-                string += '=' * 21 + '\n'
+                string += '=' * 25 + '\n'
         return string
 
 
@@ -131,20 +128,26 @@ if __name__ == "__main__":
     print("Let's start solving!")
     sleep(4)
     found = False
+    coord = 0
     coords = []
-
-    for coord in board.searcher():
-
-        coords.append(coord)
+    
+    while coord != None:
+        
+        coord = board.searcher()
+        if coord == None:
+            break
 
         found = board.implement(coord)
+        
+        if not coord in coords:
+            coords.append(coord)
 
-        place = -1
+        place = -2
         while not found:
             
-            place -= 1
             found = board.implement(coords[place], prev=True)
-            if found:
-                for prev in range(place+1, 1):
-                    found = board.implement(coords[prev], prev=True)
+            coords.pop()
+    
+    board.display()
+    header('CONGRATS! YOUR BOARD IS SOLVED!')
         
